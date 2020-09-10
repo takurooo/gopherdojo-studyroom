@@ -33,7 +33,6 @@ func IsSupported(format string) bool {
 }
 
 func NewTranscoder(inFormat, outFormat string) *Transcoder {
-
 	return &Transcoder{inFormat, outFormat}
 }
 
@@ -72,6 +71,10 @@ func (t *Transcoder) encode(w io.Writer, img image.Image, format string) (err er
 }
 
 func (t *Transcoder) Do(inPath string) (err error) {
+
+	// -------------------------
+	// decode phase
+	// -------------------------
 	rf, err := os.Open(inPath)
 	if err != nil {
 		return err
@@ -85,6 +88,9 @@ func (t *Transcoder) Do(inPath string) (err error) {
 		return err
 	}
 
+	// -------------------------
+	// encode phase
+	// -------------------------
 	dir := filepath.Dir(inPath)
 	base := filepath.Base(inPath[:len(inPath)-len(filepath.Ext(inPath))])
 	outPath := filepath.Join(dir, base+"."+t.outFormat)

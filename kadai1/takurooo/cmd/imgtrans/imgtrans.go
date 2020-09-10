@@ -68,21 +68,20 @@ func imgtransMain() int {
 	err = filepath.Walk(arg.dir, func(path string, fileInfo os.FileInfo, err error) error {
 
 		if err != nil {
-			return err
+			return err // TODO wrap error
 		}
 
 		if fileInfo.IsDir() {
 			return nil
 		}
 
-		ext := filepath.Ext(path)
-		if !strings.Contains(ext, arg.inFormat) {
+		if !strings.Contains(filepath.Ext(path), arg.inFormat) {
 			return nil
 		}
 
 		err = trans.Do(path)
 		if err != nil {
-			return err
+			return err // TODO wrap error
 		}
 
 		return nil
