@@ -45,7 +45,7 @@ func (t *Transcoder) decode(r io.Reader, format string) (img image.Image, err er
 	case JPG:
 		img, err = jpeg.Decode(r)
 	default:
-		return nil, fmt.Errorf("invalid type %s", format)
+		return nil, fmt.Errorf("transcoder.decode: invalid format %s", format)
 	}
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (t *Transcoder) encode(w io.Writer, img image.Image, format string) (err er
 	case JPG:
 		err = jpeg.Encode(w, img, nil)
 	default:
-		return fmt.Errorf("invalid type %s", format)
+		return fmt.Errorf("transcoder.encode: invalid format %s", format)
 	}
 	if err != nil {
 		return err
@@ -71,7 +71,6 @@ func (t *Transcoder) encode(w io.Writer, img image.Image, format string) (err er
 }
 
 func (t *Transcoder) Do(inPath string) (err error) {
-
 	// -------------------------
 	// decode phase
 	// -------------------------

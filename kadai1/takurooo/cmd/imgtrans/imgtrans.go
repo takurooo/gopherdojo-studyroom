@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -68,7 +69,7 @@ func imgtransMain() int {
 	err = filepath.Walk(arg.dir, func(path string, fileInfo os.FileInfo, err error) error {
 
 		if err != nil {
-			return err // TODO wrap error
+			return fmt.Errorf("filepath.Walk: %w", err)
 		}
 
 		if fileInfo.IsDir() {
@@ -81,14 +82,14 @@ func imgtransMain() int {
 
 		err = trans.Do(path)
 		if err != nil {
-			return err // TODO wrap error
+			return fmt.Errorf("filepath.Walk: %w", err)
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, errors.Unwrap(err))
 		return ExitError
 	}
 
