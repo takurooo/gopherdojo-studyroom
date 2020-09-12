@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -70,6 +71,18 @@ func (t *Transcoder) encode(w io.Writer, img image.Image, format string) (err er
 	return nil
 }
 
+// CanTrans はパス拡張子からトランスコード可能な入力フォーマットか判定する.
+func (t *Transcoder) CanTrans(path string) bool {
+	ext := filepath.Ext(path)
+	if t.inFormat == JPG || t.inFormat == JPEG {
+		return strings.Contains(ext, JPG) || strings.Contains(ext, JPEG)
+	}
+
+	return strings.Contains(ext, t.inFormat)
+}
+
+// Do 指定されたパスのファイルを指定されたフォーマットにトランスコードする.
+// トランスコードされたファイルは入力ファイルと同じ階層に拡張子が変換された状態で保存される。
 func (t *Transcoder) Do(inPath string) (err error) {
 	// -------------------------
 	// decode phase

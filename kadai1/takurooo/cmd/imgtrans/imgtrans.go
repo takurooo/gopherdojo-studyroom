@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/takurooo/gopherdojo-studyroom/kadai1/takurooo/transcoder"
 )
@@ -76,10 +75,11 @@ func imgtransMain() int {
 			return nil
 		}
 
-		if !strings.Contains(filepath.Ext(path), arg.inFormat) {
+		if !trans.CanTrans(path) {
 			return nil
 		}
 
+		fmt.Printf("Transcode from %s to %s format\n", path, arg.outFormat)
 		err = trans.Do(path)
 		if err != nil {
 			return fmt.Errorf("filepath.Walk: %w", err)
