@@ -42,18 +42,18 @@ func imgtransMain() int {
 		flag.Usage()
 		return ExitError
 	}
-	{
-		fileInfo, err := os.Stat(arg.dir)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return ExitError
-		}
 
-		if !fileInfo.IsDir() {
-			fmt.Fprintf(os.Stderr, "not directory : %s\n", arg.dir)
-			return ExitError
-		}
+	fileInfo, err := os.Stat(arg.dir)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return ExitError
 	}
+
+	if !fileInfo.IsDir() {
+		fmt.Fprintf(os.Stderr, "not directory : %s\n", arg.dir)
+		return ExitError
+	}
+
 	if !transcoder.IsSupported(arg.inFormat) {
 		fmt.Fprintf(os.Stderr, "invalid in format : %s\n", arg.inFormat)
 		return ExitError

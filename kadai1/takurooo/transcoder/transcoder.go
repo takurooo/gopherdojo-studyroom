@@ -41,9 +41,7 @@ func (t *Transcoder) decode(r io.Reader, format string) (img image.Image, err er
 	switch format {
 	case PNG:
 		img, err = png.Decode(r)
-	case JPEG:
-		fallthrough
-	case JPG:
+	case JPEG, JPG:
 		img, err = jpeg.Decode(r)
 	default:
 		return nil, fmt.Errorf("transcoder.decode: invalid format %s", format)
@@ -58,9 +56,7 @@ func (t *Transcoder) encode(w io.Writer, img image.Image, format string) (err er
 	switch format {
 	case PNG:
 		err = png.Encode(w, img)
-	case JPEG:
-		fallthrough
-	case JPG:
+	case JPEG, JPG:
 		err = jpeg.Encode(w, img, nil)
 	default:
 		return fmt.Errorf("transcoder.encode: invalid format %s", format)
@@ -74,11 +70,13 @@ func (t *Transcoder) encode(w io.Writer, img image.Image, format string) (err er
 // CanTrans はパス拡張子からトランスコード可能な入力フォーマットか判定する.
 func (t *Transcoder) CanTrans(path string) bool {
 	ext := filepath.Ext(path)
+	format := strings.TrimLeft(ext, ".")
+
 	if t.inFormat == JPG || t.inFormat == JPEG {
-		return strings.Contains(ext, JPG) || strings.Contains(ext, JPEG)
+		return format == JPG || format == JPEG
 	}
 
-	return strings.Contains(ext, t.inFormat)
+	return format == t.inFormat
 }
 
 // Do 指定されたパスのファイルを指定されたフォーマットにトランスコードする.
@@ -91,7 +89,11 @@ func (t *Transcoder) Do(inPath string) (err error) {
 	if err != nil {
 		return err
 	}
-	defer rf.Close()
+	defer func() {
+		if derr := rf.Close(); derr != nil {
+			err = fmt.Errorf("transcoder.Do: read file close err: %v, Do err: %v", derr, err)
+		}
+	}()
 
 	var img image.Image
 
@@ -104,14 +106,18 @@ func (t *Transcoder) Do(inPath string) (err error) {
 	// encode phase
 	// -------------------------
 	dir := filepath.Dir(inPath)
-	base := filepath.Base(inPath[:len(inPath)-len(filepath.Ext(inPath))])
+	base := filepath.Base(strings.TrimSuffix(inPath, filepath.Ext(inPath)))
 	outPath := filepath.Join(dir, base+"."+t.outFormat)
 
 	wf, err := os.Create(outPath)
 	if err != nil {
 		return err
 	}
-	defer wf.Close()
+	defer func() {
+		if derr := wf.Close(); derr != nil {
+			err = fmt.Errorf("transcoder.Do: write file close err: %v, Do err: %v", derr, err)
+		}
+	}()
 
 	err = t.encode(wf, img, t.outFormat)
 	if err != nil {
